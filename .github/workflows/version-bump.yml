@@ -2,44 +2,45 @@ name: Version Bump
 
 on:
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: 16
-    - run: npm ci
-    - run: npm run build
-    - run: git fetch origin
-    - name: Enforce version bumps 
-      run: |
-        diff=`npm diff --diff-name-only=true`
-        oldVersion=`git show origin/master:package.json | jq .version`
-        newVersion=`jq .version package.json`
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npm run build
+      - run: git fetch origin
+      - name: Enforce version bumps
+        run: |
+          diff=`npm diff --diff-name-only=true`
+          oldVersion=`git show origin/master:package.json | jq .version`
+          newVersion=`jq .version package.json`
 
-        echo "Old Version: $oldVersion"
-        echo "New Version: $newVersion"
-        echo "Changed Files: $diff"
+          echo "Old Version: $oldVersion"
+          echo "New Version: $newVersion"
+          echo "Changed Files: $diff"
 
-        if [ -z "$diff" ]
-        then
-          echo "No changes to package. Must not bump version."
-          if [[ "$oldVersion" == "$newVersion" ]]
+          if [ -z "$diff" ]
           then
-            exit 0
+            echo "No changes to package. Must not bump version."
+            if [[ "$oldVersion" == "$newVersion" ]]
+            then
+              exit 0
+            else
+              exit 1
+            fi
           else
-            exit 1
+            echo "Changes to package. Must bump version."
+            if [[ "$oldVersion" == "$newVersion" ]]
+            then
+              exit 1
+            else
+              exit 0
+            fi
           fi
-        else
-          echo "Changes to package. Must bump version."
-          if [[ "$oldVersion" == "$newVersion" ]]
-          then
-            exit 1
-          else
-            exit 0
-          fi
-        fi
+

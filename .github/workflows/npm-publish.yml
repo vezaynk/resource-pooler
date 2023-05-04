@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
       - run: npm ci
       - run: npm test
       - run: npm run lint
@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
           registry-url: https://registry.npmjs.org/
       - run: npm ci
       - run: npm run build
@@ -33,3 +33,4 @@ jobs:
           [ -z "$diff" ] || npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+
