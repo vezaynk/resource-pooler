@@ -41,11 +41,11 @@ workerPool.use((worker) => {
         message: "Hello World!"
     })
     return new Promise((resolve, reject) => {
-    worker
-        .once('message', (content) => {
-        resolve(content)
-        })
-        .once('error', (error) => reject(error))
+        worker
+          .once('message', (content) => {
+            resolve(content)
+          })
+          .once('error', (error) => reject(error))
     })
 })
 ```
