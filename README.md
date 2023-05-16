@@ -1,8 +1,12 @@
 # Resource-Pooler
 
-The minimal library for managing resource concurrent access over resources.
+The minimal, lock-free library for managing shared access to resources.
 
-`resource-pooler` is a simple utility for 
+Use cases:
+
+- Worker Pools
+- Request Throttling
+- Task Queues
 
 ## Distribution Strategy
 
@@ -18,7 +22,23 @@ Resources are assigned on a FIFO (first in, first out) basis:
 
 # API
 
-TODO
+## `ResourcePooler`
+
+Constructor accepts a factory to manage the creation, disposal and access to resources.
+
+See below for examples.
+
+## `createPool()`
+
+Helper function to create a pre-sized pool.
+
+```
+async function createPool(factory, size = 8) {
+    const pooler = new ResourcePooler({ factory });
+    await pooler.resize(size);
+    return pooler;
+}
+```
 
 # Examples
 
