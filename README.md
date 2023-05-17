@@ -32,7 +32,7 @@ See below for examples.
 
 Helper function to create a pre-sized pool.
 
-```
+```js
 async function createPool(factory, size = 8) {
     const pooler = new ResourcePooler({ factory });
     await pooler.resize(size);
@@ -69,3 +69,28 @@ workerPool.use((worker) => {
     })
 })
 ```
+
+## Roadmap to 1.0.0 release
+
+### Foundations
+
+- [x] Semantic guarantees
+- [x] Error handling
+- [x] Complete unit tests
+
+### Extend Design
+
+- [ ] Establish patterns for pre/post runs
+- [ ] Evaluate task executor wrappers
+- [ ] Introduce resource recycling
+- [ ] Allow disposing specific resources
+
+### Documentation
+- [ ] Complete API documentation
+- [ ] User guide
+- [ ] Code-gen documentation
+
+### Examples
+- [x] Worker Pool Example
+- [ ] Task Queue example
+- [ ] API Throttle example

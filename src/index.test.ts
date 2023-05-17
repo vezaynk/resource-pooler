@@ -5,6 +5,14 @@ const delay = () => new Promise<void>((res) => {
 });
 
 describe('Lifecycle', () => {
+  test('createPool default size', async () => {
+    await createPool({
+      create() {
+        return {};
+      },
+    });
+  });
+
   test('Pool is initialized and disposed', async () => {
     const getObject = jest.fn(() => 'A string');
     const disposeObject = jest.fn(() => {});
@@ -51,6 +59,46 @@ describe('Lifecycle', () => {
     await pool.resize(5);
 
     expect(disposeObject).toBeCalledTimes(3);
+  });
+
+  test('Pool is initialized and sized down', async () => {
+    const getObject = jest.fn(() => 'A string');
+
+    const pool = await createPool(
+      {
+        async create() {
+          await delay();
+          return getObject();
+        },
+      },
+      8,
+    );
+
+    await pool.resize(5);
+  });
+
+  test('Pool resize conflicted', async () => {
+    const getObject = jest.fn(() => 'A string');
+    const disposeObject = jest.fn(() => {});
+
+    const pool = await createPool(
+      {
+        async create() {
+          await delay();
+          return getObject();
+        },
+        async dispose() {
+          await delay();
+          return disposeObject();
+        },
+      },
+      8,
+    );
+
+    expect(getObject).toBeCalledTimes(8);
+
+    pool.resize(10);
+    await expect(pool.resize(5)).rejects.toThrow();
   });
 });
 
