@@ -220,4 +220,17 @@ describe('Error handling', () => {
     pooler.targetSize = 0;
     await expect(pooler.use(() => {}, true)).rejects.toThrow();
   });
+  test('Use throws if task throws', async () => {
+    const pooler = new ResourcePooler({
+      factory: {
+        create() {
+          return null;
+        },
+      },
+    });
+
+    await pooler.resize(1);
+    pooler.targetSize = 0;
+    await expect(pooler.use(() => { throw new Error("Whoops!")})).rejects.toThrow();
+  });
 });

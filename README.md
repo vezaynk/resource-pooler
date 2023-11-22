@@ -126,7 +126,23 @@ new ResourcePooler({
 });
 ```
 
-### Resource Disposal
+While the `access` API is very flexible, it is usually not necessary.
+
+### Disposing Resources
+
+Some resources require special calls to properly dispose. For example, Workers will not be garbage-collected unless if `terminate()` is called on them.
+
+```ts
+new ResourcePooler({
+  factory: {
+    create: () => {
+      return new Worker();
+    },
+  },
+});
+```
+
+Currently, resource disposal only happens wheh the intended pool size is reduced. In the future, it will be possible to call it to pro-actively dispose of unwanted/corrupt resources.
 
 ## `createPool()`
 
@@ -139,6 +155,28 @@ async function createPool(factory, size = 8) {
   return pooler;
 }
 ```
+
+### Using Resources
+
+Using resources is always asychronously done using a callback:
+
+```ts
+const resourcePooler = createPool(
+  {
+    create() {
+      return Math.random();
+    },
+  },
+  8
+);
+
+// This will resolve or reject depending on the callback
+const fetchResult = await resourcePooler.use((n) =>
+  fetch(`https://example.com/${n}`)
+);
+```
+
+Interally, `use` wraps and `await`s the callback, which makes any errors bubble up. Wrapping a call in `use` does not alter its behavior, only when it is called.
 
 # Examples
 
@@ -168,6 +206,52 @@ workerPool.use((worker) => {
       .once("error", (error) => reject(error));
   });
 });
+```
+
+## Parallism Limiter
+
+```ts
+// Allow only 2 requests to pend in parallel
+const fetchPool = await createPool(
+  {
+    create() {
+      return fetch;
+    },
+  },
+  2
+);
+
+function fetchAPI(id: string) {
+  return workerPool.use((fetch) => {
+    return fetch(`/api/${id}`);
+  });
+}
+```
+
+## Rate-Limiter Limiter
+
+```ts
+// Limit calls to a maximum of 1 request every 2 seconds
+// (Notice issue: First call waits 2 seconds)
+const fetchPool = await createPool(
+  {
+    create() {
+      return fetch;
+    },
+    access(fetch) {
+      return new Promise((res) => {
+        res(fetch);
+      }, 2000);
+    },
+  },
+  1
+);
+
+function fetchAPI(id: string) {
+  return workerPool.use((fetch) => {
+    return fetch(`/api/${id}`);
+  });
+}
 ```
 
 ## Roadmap to 1.0.0 release
